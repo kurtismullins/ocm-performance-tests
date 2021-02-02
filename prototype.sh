@@ -11,8 +11,8 @@
 [ ! -x "$(command -v uuid)" ] && echo "uuid not found. Is it installed?" && exit 1
 
 # Configuration
-rate='1/1s'
-duration='10s'
+rate='10/1s'
+duration='300s'
 export es=$ES_HOST  # required by snafu
 export es_index='ocm-snafu'
 test_id=$(uuid)
