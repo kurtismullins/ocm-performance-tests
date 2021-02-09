@@ -16,6 +16,8 @@ duration='300s'
 export es=$ES_HOST  # required by snafu
 export es_index='ocm-snafu'
 test_id=$(uuid)
+CS_LOAD_TES='cs-load-test'
+CS_LOAD_TEST_REPO=https://github.com/nimrodshn/cs-load-test.git
 
 echo "---------------------------------------------"
 echo "Beginning OCM Tests"
@@ -25,6 +27,8 @@ echo "Duration:   ${duration}"
 echo "Date:       $(date)"
 echo "---------------------------------------------"
 echo ""
+
+# AMS
 
 # Declare all endpoints with a given name
 declare -A endpoints
@@ -67,3 +71,18 @@ cat ./logs/${test_id}_${target} | vegeta report --every '1s' --type 'json' --out
 run_snafu -t 'vegeta' -u $test_id --target_name ${target} -r "./logs/${test_id}_${target}.json"
 
 done
+
+# CS
+if [ ! -d "$CS_LOAD_TEST" ] ; then
+    git clone $CS_LOAD_TEST_REPO
+    cd "$CS_LOAD_TEST"
+else
+    cd "$CS_LOAD_TEST"
+    git pull $CS_LOAD_TEST_REPO
+fi
+
+make && ./cs-load-test --token=$OCM_TOKEN \
+    --output-path="./logs"                \
+    --gateway-url=${OCM_HOST}             \
+    --rate=1                              \
+    --duration-in-min=1                   \
